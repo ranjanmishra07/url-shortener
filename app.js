@@ -10,11 +10,11 @@ var express = require('express'),
     btoa = require('btoa'),
     atob = require('atob'),
     promise,
-    connectionString ='mongodb://url_test:urltest1@ds245250.mlab.com:45250/url_shortener',
+    connectionString = 'mongodb://url_test:urltest1@ds245250.mlab.com:45250/url_shortener',
     port = process.env.PORT || 8080;
 
 // ExpressJS server start
-http.listen(port, function() {
+http.listen(port, function () {
     console.log('Server Started. Listening on *:' + port);
 });
 
@@ -25,12 +25,15 @@ app.use(bodyParser.urlencoded({
 }));
 
 // Base route for front-end
-app.get('/', function(req, res) {
+app.get('/', function (req, res) {
     res.sendFile('views/index.html', {
         root: __dirname
     });
 });
 
+app.get('/test1', (req, res) => {
+    res.send('whatsup')
+})
 // Counter Collection Schema
 var countersSchema = new mongoose.Schema({
     _id: { type: String, required: true },
@@ -41,7 +44,7 @@ var Counter = mongoose.model('Counter', countersSchema);
 
 // URL Collection Schema
 var urlSchema = new mongoose.Schema({
-    _id: {type: Number},
+    _id: { type: Number },
     url: '',
     created_at: ''
 });
@@ -52,11 +55,11 @@ var urlSchema = new mongoose.Schema({
 // we are doing here is incrementing the counter in the Counter collection which
 // then becomes the unique ID for the new document to be inserted in the URL
 // collection
-urlSchema.pre('save', function(next) {
+urlSchema.pre('save', function (next) {
     console.log('APP: Running pre-save');
     var that = this;
-    Counter.findByIdAndUpdate({ _id: 'url_count' }, { $inc: { count: 1 } }, function(err, counter) {
-        if(err) {
+    Counter.findByIdAndUpdate({ _id: 'url_count' }, { $inc: { count: 1 } }, function (err, counter) {
+        if (err) {
             console.error('APP: Error while finding and updating counter value');
             return next(err)
         };
@@ -98,14 +101,14 @@ promise = mongoose.connect(connectionString
 // });
 
 // API for redirection
-app.get('/:hash', function(req, res) {
+app.get('/:hash', function (req, res) {
     var baseid = req.params.hash;
-    if(baseid) {
+    if (baseid) {
         console.log('APP: Hash received: ' + baseid);
         var id = atob(baseid);
         console.log('APP: Decoding Hash: ' + baseid);
-        URL.findOne({ _id: id }, function(err, doc) {
-            if(doc) {
+        URL.findOne({ _id: id }, function (err, doc) {
+            if (doc) {
                 console.log('APP: Found ID in DB, redirecting to URL');
                 res.redirect(doc.url);
             } else {
@@ -117,10 +120,10 @@ app.get('/:hash', function(req, res) {
 });
 
 // API for shortening
-app.post('/shorten', function(req, res, next) {
+app.post('/shorten', function (req, res, next) {
     var urlData = req.body.url;
-    URL.findOne({url: urlData}, function(err, doc) {
-        if(doc) {
+    URL.findOne({ url: urlData }, function (err, doc) {
+        if (doc) {
             console.log('APP: URL found in DB');
             res.send({
                 url: urlData,
@@ -133,8 +136,8 @@ app.post('/shorten', function(req, res, next) {
             var url = new URL({
                 url: urlData
             });
-            url.save(function(err) {
-                if(err) {
+            url.save(function (err) {
+                if (err) {
                     return console.error(err);
                 }
                 res.send({
